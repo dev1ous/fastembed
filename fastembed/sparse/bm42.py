@@ -16,14 +16,6 @@ from fastembed.sparse.sparse_embedding_base import (
 )
 from fastembed.text.onnx_text_model import OnnxTextModel, TextEmbeddingWorker
 
-class SparseVector(BaseModel, extra="forbid"):
-    """
-    Sparse vector structure
-    """
-
-    indices: List[int] = Field(..., description="Indices must be unique")
-    values: List[float] = Field(..., description="Values and indices must be the same length")
-
 supported_bm42_models = [
     {
         "model": "Qdrant/bm42-all-minilm-l6-v2-attentions",
@@ -44,7 +36,7 @@ MODEL_TO_LANGUAGE = {
 }
 
 
-class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseVector]):
+class Bm42(SparseTextEmbeddingBase, OnnxTextModel[Dict[int, float]]):
     """
     Bm42 is an extension of BM25, which tries to better evaluate importance of tokens in the documents,
     by extracting attention weights from the transformer model.
@@ -187,7 +179,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseVector]):
 
         return new_vector
 
-    def _post_process_onnx_output(self, output: OnnxOutputContext) -> Iterable[SparseVector]:
+    def _post_process_onnx_output(self, output: OnnxOutputContext) -> Iterable[Dict[int, float]]:
         token_ids_batch = output.input_ids
 
         # attention_value shape: (batch_size, num_heads, num_tokens, num_tokens)
@@ -240,7 +232,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseVector]):
         batch_size: int = 256,
         parallel: Optional[int] = None,
         **kwargs,
-    ) -> Iterable[SparseVector]:
+    ) -> Iterable[Dict[int, float]]:
         """
         Encode a list of documents into list of embeddings.
         We use mean pooling with attention so that the model can handle variable-length inputs.
