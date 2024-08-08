@@ -214,7 +214,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseVector]):
 
             rescored = self._rescore_vector(max_token_weight)
 
-            yield SparseVector(indices=list(rescored.keys()), values=list(rescored.values()))
+            yield rescored
 
     @classmethod
     def list_supported_models(cls) -> List[Dict[str, Any]]:
