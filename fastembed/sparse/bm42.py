@@ -1,6 +1,7 @@
 import math
 import string
 from pathlib import Path
+from pydantic import BaseModel, Field
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, Union
 
 import mmh3
@@ -14,6 +15,14 @@ from fastembed.sparse.sparse_embedding_base import (
     SparseTextEmbeddingBase,
 )
 from fastembed.text.onnx_text_model import OnnxTextModel, TextEmbeddingWorker
+
+class SparseVector(BaseModel, extra="forbid"):
+    """
+    Sparse vector structure
+    """
+
+    indices: List[int] = Field(..., description="Indices must be unique")
+    values: List[float] = Field(..., description="Values and indices must be the same length")
 
 supported_bm42_models = [
     {
