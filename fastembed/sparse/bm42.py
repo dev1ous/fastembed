@@ -289,7 +289,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseVector]):
             filtered = self._filter_pair_tokens(reconstructed)
             stemmed = self._stem_pair_tokens(filtered)
 
-            query_dict = self._query_rehash(token for token, _ in stemmed))
+            query_dict = self._query_rehash(token for token, _ in stemmed)
             yield { 'values': np.array(query_dict.values()), 'indices': np.array(query_dict.keys()) }
 
     @classmethod
