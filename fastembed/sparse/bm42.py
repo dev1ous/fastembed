@@ -179,7 +179,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseEmbedding]):
 
         return new_vector
 
-    def _post_process_onnx_output(self, output: OnnxOutputContext) -> Iterable[SparseEmbedding]:
+    def _post_process_onnx_output(self, output: OnnxOutputContext) -> Iterable[SparseVector]:
         token_ids_batch = output.input_ids
 
         # attention_value shape: (batch_size, num_heads, num_tokens, num_tokens)
@@ -206,7 +206,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseEmbedding]):
 
             rescored = self._rescore_vector(max_token_weight)
 
-            yield SparseEmbedding.from_dict(rescored)
+            yield SparseVector(indices=list(rescored.keys()), values=list(rescored.values()))
 
     @classmethod
     def list_supported_models(cls) -> List[Dict[str, Any]]:
@@ -232,7 +232,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseEmbedding]):
         batch_size: int = 256,
         parallel: Optional[int] = None,
         **kwargs,
-    ) -> Iterable[SparseEmbedding]:
+    ) -> Iterable[SparseVector]:
         """
         Encode a list of documents into list of embeddings.
         We use mean pooling with attention so that the model can handle variable-length inputs.
@@ -265,7 +265,7 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseEmbedding]):
             result[token_id] = 1.0
         return result
 
-    def query_embed(self, query: Union[str, Iterable[str]], **kwargs) -> Iterable[SparseEmbedding]:
+    def query_embed(self, query: Union[str, Iterable[str]], **kwargs) -> Iterable[Dict[str, np.ndarray]]:
         """
         To emulate BM25 behaviour, we don't need to use smart weights in the query, and
         it's enough to just hash the tokens and assign a weight of 1.0 to them.
@@ -281,7 +281,8 @@ class Bm42(SparseTextEmbeddingBase, OnnxTextModel[SparseEmbedding]):
             filtered = self._filter_pair_tokens(reconstructed)
             stemmed = self._stem_pair_tokens(filtered)
 
-            yield SparseEmbedding.from_dict(self._query_rehash(token for token, _ in stemmed))
+            query_dict = self._query_rehash(token for token, _ in stemmed))
+            yield { 'values': np.array(query_dict.values()), 'indices': np.array(query_dict.keys()) }
 
     @classmethod
     def _get_worker_class(cls) -> Type[TextEmbeddingWorker]:
