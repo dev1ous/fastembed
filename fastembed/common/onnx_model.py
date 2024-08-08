@@ -81,9 +81,15 @@ class OnnxModel(Generic[T]):
             so.intra_op_num_threads = threads
             so.inter_op_num_threads = threads
 
-        self.model = ort.InferenceSession(
-            str(model_path), providers=onnx_providers, sess_options=so
-        )
+        if 'OpenVINOExecutionProvider' in onnx_providers:
+            self.model = ort.InferenceSession(
+                str(model_path), providers=onnx_providers, sess_options=so, provider_options=[{'device_type' : 'CPU_FP32'}]
+            )
+        else:
+            self.model = ort.InferenceSession(
+                str(model_path), providers=onnx_providers, sess_options=so
+            )
+            
         if "CUDAExecutionProvider" in requested_provider_names:
             current_providers = self.model.get_providers()
             if "CUDAExecutionProvider" not in current_providers:
