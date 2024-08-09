@@ -47,12 +47,12 @@ class SparseTextEmbeddingBase(ModelManagement):
         batch_size: int = 256,
         parallel: Optional[int] = None,
         **kwargs,
-    ) -> Iterable[SparseEmbedding]:
+    ) -> Iterable[Dict[int, float]]:
         raise NotImplementedError()
 
     def passage_embed(
         self, texts: Iterable[str], **kwargs
-    ) -> Iterable[SparseEmbedding]:
+    ) -> Iterable[Dict[int, float]]:
         """
         Embeds a list of text passages into a list of embeddings.
 
@@ -69,7 +69,7 @@ class SparseTextEmbeddingBase(ModelManagement):
 
     def query_embed(
         self, query: Union[str, Iterable[str]], **kwargs
-    ) -> Iterable[SparseEmbedding]:
+    ) -> Iterable[Dict[int, float]]:
         """
         Embeds queries
 
