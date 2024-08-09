@@ -97,7 +97,7 @@ class SparseTextEmbedding(SparseTextEmbeddingBase):
 
     def query_embed(
         self, query: Union[str, Iterable[str]], **kwargs
-    ) -> Iterable[SparseEmbedding]:
+    ) -> Iterable[Dict[str, np.ndarray]]:
         """
         Embeds queries
 
